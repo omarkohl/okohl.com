@@ -1,0 +1,53 @@
+---
+import Base from "../layouts/Base.astro";
+import NoteList from "../components/NoteList.astro";
+import EssayList from "../components/EssayList.astro";
+import TopicIndex from "../components/TopicIndex.astro";
+import { STAGES, allNotes, topicsOf } from "../lib/notes";
+
+const notes = await allNotes();
+const recent = notes.filter((n) => n.data.kind === "note").slice(0, 10);
+const essays = notes.filter((n) => n.data.kind === "essay");
+const topics = [...topicsOf(notes).keys()];
+---
+
+<Base>
+  <section class="flex flex-wrap gap-12">
+    <p class="m-0 flex-[2_1_420px] text-[23px] leading-normal">
+      Short notes written most days, and the occasional longer essay when a
+      thread of them has grown into something. Ideas are revised in place; every
+      page says how settled it is.
+    </p>
+    <dl class="m-0 grid flex-[1_1_240px] grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-[15px] leading-normal text-ink-3">
+      {Object.values(STAGES).map((s) => (
+        <>
+          <dt class="text-lg">{s.symbol}</dt>
+          <dd class="m-0">
+            <i>{s.label}</i> — {s.blurb}
+          </dd>
+        </>
+      ))}
+    </dl>
+  </section>
+
+  <div class="flex flex-wrap gap-16">
+    <section class="flex min-w-0 flex-[3_1_480px] flex-col gap-2">
+      <h2 class="section-title m-0 mb-2">Lately</h2>
+      <NoteList notes={recent} />
+      <a href="/notes/" class="mt-2 text-[15px] italic">
+        All notes, by date →
+      </a>
+    </section>
+    <section class="flex min-w-0 flex-[2_1_320px] flex-col gap-2">
+      <h2 class="section-title m-0 mb-2">Essays</h2>
+      <EssayList essays={essays} />
+    </section>
+  </div>
+
+  {topics.length > 0 && (
+    <section class="flex flex-col gap-3">
+      <h2 class="section-title m-0">Index of topics</h2>
+      <TopicIndex topics={topics} />
+    </section>
+  )}
+</Base>

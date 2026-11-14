@@ -1,0 +1,94 @@
+---
+import { render } from "astro:content";
+import Base from "../layouts/Base.astro";
+import {
+  STAGES,
+  allNotes,
+  backlinks,
+  fmtLong,
+  minutes,
+  tended,
+  topicUrl,
+  url,
+  type Note,
+} from "../lib/notes";
+
+export async function getStaticPaths() {
+  const notes = await allNotes();
+  return notes.map((note) => ({
+    params: { slug: note.id },
+    props: { note, linkedFrom: backlinks(note, notes) },
+  }));
+}
+
+const { note, linkedFrom } = Astro.props as { note: Note; linkedFrom: Note[] };
+const { Content } = await render(note);
+const { title, kind, stage, planted, topics, description } = note.data;
+const s = STAGES[stage];
+---
+
+<Base title={title} description={description}>
+  <article class="flex max-w-[680px] min-w-0 flex-col gap-6" data-pagefind-body>
+    <header class="flex flex-col gap-2.5">
+      <h1 class="m-0 text-[40px] leading-tight font-semibold">{title}</h1>
+      <p class="m-0 text-[15px] text-muted italic">
+        <span>
+          planted{" "}
+          <time datetime={planted.toISOString()}>{fmtLong(planted)}</time>
+        </span>
+        {" · "}
+        <span>
+          last tended{" "}
+          <time datetime={tended(note).toISOString()}>
+            {fmtLong(tended(note))}
+          </time>
+        </span>
+        {" · "}
+        <span data-pagefind-filter="stage">
+          {s.symbol} {s.label.toLowerCase()}
+        </span>
+        {topics.length > 0 && " · "}
+        {topics.map((t, i) => (
+          <>
+            {i > 0 && ", "}
+            <a href={topicUrl(t)} data-pagefind-filter="topic">
+              {t}
+            </a>
+          </>
+        ))}
+        {" · "}
+        <span>{minutes(note)} min</span>
+      </p>
+      <span hidden data-pagefind-filter="kind">
+        {kind}
+      </span>
+      <span hidden data-pagefind-meta="date">
+        {fmtLong(tended(note))}
+      </span>
+      <span hidden data-pagefind-meta="stage">
+        {s.symbol} {s.label.toLowerCase()}
+      </span>
+    </header>
+
+    <div class="prose max-w-none">
+      <Content />
+    </div>
+
+    {linkedFrom.length > 0 && (
+      <section
+        class="mt-6 flex flex-col gap-3 border-t border-ink pt-4"
+        data-pagefind-ignore
+      >
+        <h2 class="smallcaps m-0 text-lg font-semibold">Linked from</h2>
+        {linkedFrom.map((n) => (
+          <div class="text-base">
+            <a href={url(n)} class="font-semibold">
+              {n.data.title}
+            </a>{" "}
+            <span class="text-muted">· {n.data.kind}</span>
+          </div>
+        ))}
+      </section>
+    )}
+  </article>
+</Base>

@@ -1,0 +1,23 @@
+---
+import { topicUrl } from "../lib/notes";
+
+interface Props {
+  topics: string[];
+}
+const groups = new Map<string, string[]>();
+for (const t of Astro.props.topics) {
+  const k = t[0].toLowerCase();
+  groups.set(k, [...(groups.get(k) ?? []), t]);
+}
+---
+
+<div class="grid grid-cols-2 gap-6 text-base sm:grid-cols-4">
+  {[...groups].map(([letter, ts]) => (
+    <div class="flex flex-col gap-1">
+      <span class="smallcaps text-accent">{letter}</span>
+      {ts.map((t) => (
+        <a href={topicUrl(t)}>{t}</a>
+      ))}
+    </div>
+  ))}
+</div>

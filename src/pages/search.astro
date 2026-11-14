@@ -1,0 +1,176 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Search" current="search">
+  <form class="flex flex-col gap-3.5" role="search" action="/search/">
+    <label for="q" class="smallcaps text-[15px] text-muted">
+      search everything I have written
+    </label>
+    <div class="flex items-center gap-3 border-b-2 border-ink pb-1.5">
+      <input
+        id="q"
+        name="q"
+        type="search"
+        autocomplete="off"
+        autofocus
+        class="min-w-0 flex-1 bg-transparent p-0 text-[28px] outline-none sm:text-4xl"
+      />
+      <span
+        id="status"
+        class="text-sm whitespace-nowrap text-muted italic"
+        aria-live="polite"
+      ></span>
+    </div>
+    <div class="flex flex-wrap items-baseline gap-x-7 gap-y-2 text-[15px]">
+      <span class="flex items-baseline gap-3" id="kind-filter">
+        <span class="smallcaps text-muted">kind</span>
+        <button type="button" data-kind="" class="cursor-pointer">
+          all
+        </button>
+        <button type="button" data-kind="note" class="cursor-pointer">
+          notes
+        </button>
+        <button type="button" data-kind="essay" class="cursor-pointer">
+          essays
+        </button>
+      </span>
+    </div>
+  </form>
+
+  <section id="results" class="flex flex-col gap-7" aria-label="Search results">
+    <noscript>
+      <p class="m-0 text-muted italic">
+        Search needs JavaScript. Every note is also listed on the{" "}
+        <a href="/notes/">notes</a> and
+        <a href="/topics/">topics</a> pages.
+      </p>
+    </noscript>
+  </section>
+</Base>
+
+<style>
+  #kind-filter button[aria-pressed="true"] {
+    font-weight: 600;
+  }
+  #kind-filter button[aria-pressed="false"] {
+    text-decoration: underline;
+    text-decoration-color: var(--color-underline);
+    text-underline-offset: 3px;
+  }
+</style>
+
+<script>
+  type Result = {
+    url: string;
+    excerpt: string;
+    meta: { title?: string; date?: string; stage?: string };
+    filters: { kind?: string[] };
+  };
+  type Pagefind = {
+    init: () => Promise<void>;
+    debouncedSearch: (
+      q: string,
+      opts?: { filters?: Record<string, string> },
+      ms?: number,
+    ) => Promise<{ results: { data: () => Promise<Result> }[] } | null>;
+  };
+
+  const input = document.querySelector<HTMLInputElement>("#q")!;
+  const status = document.querySelector<HTMLElement>("#status")!;
+  const results = document.querySelector<HTMLElement>("#results")!;
+  const kindButtons = [
+    ...document.querySelectorAll<HTMLButtonElement>("#kind-filter button"),
+  ];
+
+  const params = new URLSearchParams(location.search);
+  input.value = params.get("q") ?? "";
+  let kind = params.get("kind") ?? "";
+
+  let pagefind: Pagefind | null = null;
+  try {
+    const path = "/pagefind/pagefind.js";
+    pagefind = await import(/* @vite-ignore */ path);
+    await pagefind!.init();
+  } catch {
+    status.textContent = "search index not built (run npm run build)";
+  }
+
+  function el<K extends keyof HTMLElementTagNameMap>(
+    tag: K,
+    cls: string,
+    text?: string,
+  ) {
+    const e = document.createElement(tag);
+    e.className = cls;
+    if (text) e.textContent = text;
+    return e;
+  }
+
+  function render(items: Result[], total: number, ms: number) {
+    status.textContent = `${total} result${total === 1 ? "" : "s"} · ${Math.round(ms)} ms`;
+    results.replaceChildren(
+      ...items.map((r) => {
+        const art = el("article", "flex flex-col gap-1");
+        const k = r.filters.kind?.[0] ?? "note";
+        art.append(
+          el(
+            "span",
+            "smallcaps text-[13px] text-muted",
+            [k, r.meta.stage, r.meta.date].filter(Boolean).join(" · "),
+          ),
+        );
+        const a = el(
+          "a",
+          "text-[22px] font-semibold no-underline",
+          r.meta.title ?? r.url,
+        );
+        a.href = r.url;
+        art.append(a);
+        const p = el("p", "m-0 text-base text-ink-2");
+        p.innerHTML = `…${r.excerpt}…`; // Pagefind escapes content; only <mark> is added.
+        art.append(p);
+        return art;
+      }),
+    );
+  }
+
+  async function run() {
+    kindButtons.forEach((b) =>
+      b.setAttribute("aria-pressed", String(b.dataset.kind === kind)),
+    );
+    const q = input.value.trim();
+    const url = new URL(location.href);
+    url.searchParams.set("q", q);
+    if (kind) url.searchParams.set("kind", kind);
+    else url.searchParams.delete("kind");
+    history.replaceState(null, "", url);
+
+    if (!pagefind) return;
+    if (!q) {
+      status.textContent = "";
+      results.replaceChildren();
+      return;
+    }
+    const t0 = performance.now();
+    const search = await pagefind.debouncedSearch(
+      q,
+      { filters: kind ? { kind } : {} },
+      150,
+    );
+    if (!search) return; // superseded by a newer query
+    const items = await Promise.all(
+      search.results.slice(0, 20).map((r) => r.data()),
+    );
+    render(items, search.results.length, performance.now() - t0);
+  }
+
+  input.addEventListener("input", run);
+  kindButtons.forEach((b) =>
+    b.addEventListener("click", () => {
+      kind = b.dataset.kind ?? "";
+      run();
+    }),
+  );
+  run();
+</script>

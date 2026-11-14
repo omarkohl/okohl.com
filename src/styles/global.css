@@ -1,0 +1,77 @@
+@import "tailwindcss";
+@import "@fontsource-variable/source-serif-4/opsz.css";
+@import "@fontsource-variable/source-serif-4/opsz-italic.css";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --font-serif: "Source Serif 4 Variable", Georgia, serif;
+  --color-paper: #fcfbf8;
+  --color-ink: #1c1c1c;
+  --color-ink-2: #3e3a33;
+  --color-ink-3: #4a463f;
+  --color-muted: #6b665d;
+  --color-rule: #d9d4ca;
+  --color-underline: #b9b4aa;
+  --color-accent: #7a1f1f;
+  --color-wash: #f4f1ea;
+  --color-mark: #f1e2c4;
+}
+
+@layer base {
+  html {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-serif);
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  a {
+    text-decoration: underline;
+    text-decoration-color: var(--color-underline);
+    text-underline-offset: 3px;
+  }
+  a:hover {
+    color: var(--color-accent);
+    text-decoration-color: var(--color-accent);
+  }
+  input[type="search"]::-webkit-search-cancel-button {
+    appearance: none;
+  }
+  mark {
+    background: var(--color-mark);
+    color: inherit;
+    padding: 0 2px;
+  }
+}
+
+@utility smallcaps {
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+}
+
+@utility section-title {
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  font-size: 20px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--color-rule);
+  padding-bottom: 6px;
+}
+
+.prose {
+  --tw-prose-body: var(--color-ink);
+  --tw-prose-headings: var(--color-ink);
+  --tw-prose-links: var(--color-ink);
+  --tw-prose-bold: var(--color-ink);
+  --tw-prose-quotes: var(--color-ink-2);
+  --tw-prose-quote-borders: var(--color-rule);
+  --tw-prose-hr: var(--color-rule);
+  --tw-prose-bullets: var(--color-muted);
+  --tw-prose-counters: var(--color-muted);
+  --tw-prose-code: var(--color-ink);
+  font-size: 19px;
+  line-height: 1.65;
+}
+.prose a {
+  font-weight: inherit;
+}

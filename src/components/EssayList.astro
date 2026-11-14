@@ -1,0 +1,28 @@
+---
+import { STAGES, minutes, url, type Note } from "../lib/notes";
+
+interface Props {
+  essays: Note[];
+}
+const { essays } = Astro.props;
+---
+
+{essays.length === 0 ? (
+  <p class="m-0 text-[15.5px] text-ink-3 italic">
+    None yet. Essays grow out of notes.
+  </p>
+) : (
+  essays.map((e) => (
+    <article class="flex flex-col gap-1 pb-4">
+      <a href={url(e)} class="text-[21px] font-semibold no-underline">
+        {e.data.title}
+      </a>
+      <p class="m-0 text-[15.5px] text-ink-3">
+        {e.data.description}{" "}
+        <i>
+          ~{minutes(e)} min · {STAGES[e.data.stage].symbol}
+        </i>
+      </p>
+    </article>
+  ))
+)}

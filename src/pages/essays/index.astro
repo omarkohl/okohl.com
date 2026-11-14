@@ -1,0 +1,14 @@
+---
+import Base from "../../layouts/Base.astro";
+import EssayList from "../../components/EssayList.astro";
+import { allNotes } from "../../lib/notes";
+
+const essays = (await allNotes()).filter((n) => n.data.kind === "essay");
+---
+
+<Base title="Essays" current="essays">
+  <section class="flex max-w-[680px] flex-col gap-2">
+    <h1 class="section-title m-0 mb-2">Essays</h1>
+    <EssayList essays={essays} />
+  </section>
+</Base>

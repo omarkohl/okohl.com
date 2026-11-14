@@ -1,0 +1,96 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  current?: "notes" | "essays" | "topics" | "search";
+}
+
+const {
+  title,
+  description = "Notes and essays by Omar Kohl.",
+  current,
+} = Astro.props;
+const fullTitle = title ? `${title} · Omar Kohl` : "Omar Kohl";
+const nav = [
+  { key: "notes", href: "/notes/", label: "notes" },
+  { key: "essays", href: "/essays/", label: "essays" },
+  { key: "topics", href: "/topics/", label: "topics" },
+] as const;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="Omar Kohl"
+      href="/rss.xml"
+    />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+  </head>
+  <body class="min-h-screen">
+    <div class="mx-auto flex max-w-[1040px] flex-col gap-12 px-4 pt-10 pb-24 sm:px-8 sm:pt-14">
+      <header class="flex flex-wrap items-baseline justify-between gap-4 border-b border-ink pb-3">
+        <a href="/" class="smallcaps text-[24px] font-semibold no-underline">
+          Omar Kohl
+        </a>
+        <nav class="smallcaps flex flex-wrap gap-6 text-[17px]">
+          {nav.map((n) => (
+            <a
+              href={n.href}
+              class:list={[current === n.key && "text-accent"]}
+              aria-current={current === n.key ? "page" : undefined}
+            >
+              {n.label}
+            </a>
+          ))}
+          <a
+            href="/search/"
+            class:list={[
+              "inline-flex items-center gap-2 no-underline",
+              current === "search" && "text-accent",
+            ]}
+            aria-current={current === "search" ? "page" : undefined}
+          >
+            search
+            <kbd class="rounded-[3px] border border-[#8a857c] px-[5px] font-mono text-xs leading-[18px]">
+              /
+            </kbd>
+          </a>
+        </nav>
+      </header>
+
+      <main class="flex flex-col gap-14">
+        <slot />
+      </main>
+
+      <footer class="flex flex-wrap justify-between gap-3 border-t border-rule pt-4 text-sm text-muted">
+        <span>Every page is plain text you can read without JavaScript.</span>
+        <span class="flex gap-4">
+          <a href="/rss.xml">RSS</a>
+        </span>
+      </footer>
+    </div>
+
+    <script>
+      // "/" jumps to search from anywhere, unless the user is typing.
+      document.addEventListener("keydown", (e) => {
+        const t = e.target as HTMLElement;
+        if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey) return;
+        if (t.closest("input, textarea, [contenteditable]")) return;
+        e.preventDefault();
+        const box = document.querySelector<HTMLInputElement>("#q");
+        if (box) box.focus();
+        else location.href = "/search/";
+      });
+    </script>
+  </body>
+</html>

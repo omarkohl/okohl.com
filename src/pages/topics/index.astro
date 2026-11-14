@@ -1,0 +1,14 @@
+---
+import Base from "../../layouts/Base.astro";
+import TopicIndex from "../../components/TopicIndex.astro";
+import { allNotes, topicsOf } from "../../lib/notes";
+
+const topics = [...topicsOf(await allNotes()).keys()];
+---
+
+<Base title="Topics" current="topics">
+  <section class="flex flex-col gap-3">
+    <h1 class="section-title m-0">Index of topics</h1>
+    <TopicIndex topics={topics} />
+  </section>
+</Base>

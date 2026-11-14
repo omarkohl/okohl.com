@@ -1,0 +1,16 @@
+---
+import Base from "../../layouts/Base.astro";
+import NoteList from "../../components/NoteList.astro";
+import { allNotes } from "../../lib/notes";
+
+const notes = (await allNotes()).filter((n) => n.data.kind === "note");
+---
+
+<Base title="Notes" current="notes">
+  <section class="flex flex-col gap-2">
+    <h1 class="section-title m-0 mb-2">
+      All notes, most recently tended first
+    </h1>
+    <NoteList notes={notes} />
+  </section>
+</Base>

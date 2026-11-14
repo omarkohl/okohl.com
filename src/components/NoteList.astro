@@ -1,0 +1,33 @@
+---
+import { STAGES, fmtShort, tended, url, type Note } from "../lib/notes";
+
+interface Props {
+  notes: Note[];
+}
+const { notes } = Astro.props;
+---
+
+<ol class="m-0 flex list-none flex-col gap-3.5 p-0">
+  {notes.map((n) => (
+    <li class="grid grid-cols-[64px_20px_1fr] items-baseline gap-2 sm:grid-cols-[76px_20px_1fr]">
+      <time
+        datetime={tended(n).toISOString()}
+        class="text-sm text-muted tabular-nums"
+      >
+        {fmtShort(tended(n))}
+      </time>
+      <span title={STAGES[n.data.stage].label}>
+        {STAGES[n.data.stage].symbol}
+      </span>
+      <span>
+        <a href={url(n)}>{n.data.title}</a>
+        {n.data.topics.length > 0 && (
+          <span class="text-[15px] text-muted">
+            {" "}
+            — {n.data.topics.join(", ")}
+          </span>
+        )}
+      </span>
+    </li>
+  ))}
+</ol>
