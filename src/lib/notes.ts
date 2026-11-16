@@ -17,6 +17,7 @@ const RESERVED = new Set([
   "notes",
   "essays",
   "topics",
+  "about",
   "search",
   "rss.xml",
   "pagefind",

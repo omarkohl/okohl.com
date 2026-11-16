@@ -1,0 +1,45 @@
+---
+import Base from "../layouts/Base.astro";
+import { REPO, STAGES } from "../lib/notes";
+---
+
+<Base
+  title="About"
+  description="What this site is and how to read it."
+  current="about"
+>
+  <article class="prose max-w-[680px]">
+    <h1 class="text-[40px] leading-tight font-semibold">About</h1>
+    <p>
+      I am Omar Kohl. This site is where I write down notes and thoughts as they
+      occur, and revise them when they are no longer correct or up to date.{" "}
+      <a href="/writing-more/">Writing More</a> explains why.
+    </p>
+
+    <h2>How to read this site</h2>
+    <p>
+      Notes are not a blog: the order in time matters less than the idea. A note
+      is changed in place, and now and then a thread of notes grows into an
+      essay. Each page says how settled it is:
+    </p>
+    <ul>
+      {Object.values(STAGES).map((s) => (
+        <li>
+          {s.symbol} <i>{s.label}</i> — {s.blurb}
+        </li>
+      ))}
+    </ul>
+    <p>
+      Each note also shows when it was planted, when it was last tended, its
+      revision history and the notes that link to it.
+    </p>
+
+    <h2>Colophon</h2>
+    <p>
+      Built with <a href="https://astro.build/">Astro</a>, set in Source Serif 4
+      and searched with <a href="https://pagefind.app/">Pagefind</a>. The source
+      is on <a href={REPO}>GitHub</a>. New and revised notes are in the{" "}
+      <a href="/rss.xml">RSS feed</a>.
+    </p>
+  </article>
+</Base>

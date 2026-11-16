@@ -4,7 +4,7 @@ import "../styles/global.css";
 interface Props {
   title?: string;
   description?: string;
-  current?: "notes" | "essays" | "topics" | "search";
+  current?: "notes" | "essays" | "topics" | "about" | "search";
   /** Set for notes and essays: marks the page as an article for previews. */
   article?: { published: Date; modified: Date; tags: string[] };
 }
@@ -20,6 +20,7 @@ const nav = [
   { key: "notes", href: "/notes/", label: "notes" },
   { key: "essays", href: "/essays/", label: "essays" },
   { key: "topics", href: "/topics/", label: "topics" },
+  { key: "about", href: "/about/", label: "about" },
 ] as const;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
