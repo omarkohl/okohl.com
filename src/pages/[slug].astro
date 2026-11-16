@@ -13,16 +13,30 @@ import {
   url,
   type Note,
 } from "../lib/notes";
+import { similar } from "../lib/similar";
 
 export async function getStaticPaths() {
   const notes = await allNotes();
-  return notes.map((note) => ({
-    params: { slug: note.id },
-    props: { note, linkedFrom: backlinks(note, notes) },
-  }));
+  return notes.map((note) => {
+    const linkedFrom = backlinks(note, notes);
+    // A note already listed under "Linked from" is not repeated as similar.
+    const rest = notes.filter((n) => !linkedFrom.includes(n));
+    return {
+      params: { slug: note.id },
+      props: { note, linkedFrom, related: similar(note, rest) },
+    };
+  });
 }
 
-const { note, linkedFrom } = Astro.props as { note: Note; linkedFrom: Note[] };
+const { note, linkedFrom, related } = Astro.props as {
+  note: Note;
+  linkedFrom: Note[];
+  related: Note[];
+};
+const sections = [
+  { heading: "Linked from", notes: linkedFrom },
+  { heading: "Similar", notes: related },
+].filter((s) => s.notes.length > 0);
 const { Content } = await render(note);
 const { title, kind, stage, planted, topics } = note.data;
 const s = STAGES[stage];
@@ -79,13 +93,13 @@ const s = STAGES[stage];
       <Content />
     </div>
 
-    {linkedFrom.length > 0 && (
+    {sections.map((sec) => (
       <section
         class="mt-6 flex flex-col gap-3 border-t border-ink pt-4"
         data-pagefind-ignore
       >
-        <h2 class="smallcaps m-0 text-lg font-semibold">Linked from</h2>
-        {linkedFrom.map((n) => (
+        <h2 class="smallcaps m-0 text-lg font-semibold">{sec.heading}</h2>
+        {sec.notes.map((n) => (
           <div class="text-base">
             <a href={url(n)} class="font-semibold">
               {n.data.title}
@@ -94,6 +108,6 @@ const s = STAGES[stage];
           </div>
         ))}
       </section>
-    )}
+    ))}
   </article>
 </Base>
