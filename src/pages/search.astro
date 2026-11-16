@@ -1,6 +1,11 @@
 ---
 import Base from "../layouts/Base.astro";
-import { STAGES } from "../lib/notes";
+import { STAGES, allNotes, topicsOf } from "../lib/notes";
+
+// Topic names with their note counts, for the "topic match" banner.
+const topics = Object.fromEntries(
+  [...topicsOf(await allNotes())].map(([t, notes]) => [t, notes.length]),
+);
 
 const groups = [
   {
@@ -75,6 +80,12 @@ const groups = [
     </p>
   </form>
 
+  <div
+    id="topic-match"
+    class="-mb-6 flex flex-col gap-2 empty:hidden"
+    data-topics={JSON.stringify(topics)}
+  ></div>
+
   <section id="results" class="flex flex-col gap-7" aria-label="Search results">
     <noscript>
       <p class="m-0 text-muted italic">
@@ -121,6 +132,8 @@ const groups = [
   const input = document.querySelector<HTMLInputElement>("#q")!;
   const status = document.querySelector<HTMLElement>("#status")!;
   const results = document.querySelector<HTMLElement>("#results")!;
+  const banner = document.querySelector<HTMLElement>("#topic-match")!;
+  const topics: Record<string, number> = JSON.parse(banner.dataset.topics!);
   const buttons = [
     ...document.querySelectorAll<HTMLButtonElement>(".option-group button"),
   ];
@@ -180,6 +193,27 @@ const groups = [
     );
   }
 
+  /** Points to the topic page when the query names a topic. */
+  function renderTopics(names: string[]) {
+    banner.replaceChildren(
+      ...names
+        .filter((t) => t in topics)
+        .map((t) => {
+          const n = topics[t];
+          const a = el(
+            "a",
+            "border-l-2 border-accent bg-wash px-4 py-2 text-base no-underline",
+          );
+          a.href = `/topics/${t}/`;
+          a.append(
+            el("strong", "font-semibold", t),
+            ` is a topic · ${n} note${n === 1 ? "" : "s"} →`,
+          );
+          return a;
+        }),
+    );
+  }
+
   async function run() {
     buttons.forEach((b) =>
       b.setAttribute(
@@ -196,8 +230,11 @@ const groups = [
     }
     history.replaceState(null, "", url);
 
-    if (!pagefind) return;
     const query = parseQuery(q);
+    renderTopics([
+      ...new Set([...query.topics, query.term.replace(/"/g, "").toLowerCase()]),
+    ]);
+    if (!pagefind) return;
     const filters: Record<string, string | string[]> = {};
     if (chosen.kind) filters.kind = chosen.kind;
     if (query.topics.length) filters.topic = query.topics;
