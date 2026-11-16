@@ -8,6 +8,14 @@ describe("extractInternalLinks", () => {
     expect(extractInternalLinks(md)).toEqual(["writing-more", "other"]);
   });
 
+  it("finds wiki links", () => {
+    expect(extractInternalLinks("[[a]] [[b|text]] [[c#part]]")).toEqual([
+      "a",
+      "b",
+      "c",
+    ]);
+  });
+
   it("deduplicates", () => {
     expect(extractInternalLinks("[a](/x/) [b](/x/)")).toEqual(["x"]);
   });

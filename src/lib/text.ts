@@ -1,10 +1,13 @@
-/** Slugs of site-internal markdown links, e.g. `[x](/foo/)` → `foo`. */
+/**
+ * Slugs of site-internal links: markdown `[x](/foo/)` and wiki `[[foo]]`,
+ * `[[foo|x]]`, `[[foo#part]]`.
+ */
 export function extractInternalLinks(markdown: string): string[] {
   const slugs = new Set<string>();
   for (const m of markdown.matchAll(
-    /\]\(\/([a-z0-9][a-z0-9-]*)\/?(?:#[^)]*)?\)/gi,
+    /\]\(\/([a-z0-9][a-z0-9-]*)\/?(?:#[^)]*)?\)|\[\[([a-z0-9][a-z0-9-]*)(?:[#|][^\]]*)?\]\]/gi,
   )) {
-    slugs.add(m[1].toLowerCase());
+    slugs.add((m[1] ?? m[2]).toLowerCase());
   }
   return [...slugs];
 }

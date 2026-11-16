@@ -25,4 +25,4 @@ draft: false
 ---
 ```
 
-Link notes with plain markdown: `[text](/other-slug/)`. Backlinks are computed from these links.
+Link notes with `[[other-slug]]` (shows the title of that note), `[[other-slug|text]]` or plain markdown `[text](/other-slug/)`. Backlinks are computed from these links.
