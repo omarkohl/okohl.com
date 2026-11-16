@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { markdownToHtml } from "satteri";
-import { wikiLinks } from "./markdown";
+import { sidenotes, wikiLinks } from "./markdown";
 
 const html = (md: string) =>
   markdownToHtml(md, {
@@ -29,5 +29,22 @@ describe("wikiLinks", () => {
     expect(html("[a](/x/) [b](https://x.org)")).toBe(
       '<p><a href="/x/">a</a> <a href="https://x.org">b</a></p>',
     );
+  });
+});
+
+describe("sidenotes", () => {
+  const out = markdownToHtml(
+    "Claim.[^a] More.\n\n[^a]: One *two*.\n\n    Three.",
+    { hastPlugins: [sidenotes] },
+  ).html;
+
+  it("copies the footnote next to its reference", () => {
+    expect(out).toContain(
+      '</sup><span class="sidenote" data-pagefind-ignore><sup>1</sup> One <em>two</em>. Three. </span> More.',
+    );
+  });
+
+  it("keeps the footnote list for narrow screens", () => {
+    expect(out).toContain('<section data-footnotes class="footnotes">');
   });
 });

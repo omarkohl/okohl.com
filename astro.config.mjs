@@ -1,7 +1,7 @@
 import { defineConfig } from "astro/config";
 import { satteri } from "@astrojs/markdown-satteri";
 import tailwindcss from "@tailwindcss/vite";
-import { noteTitle, wikiLinks } from "./src/lib/markdown";
+import { noteTitle, sidenotes, wikiLinks } from "./src/lib/markdown";
 
 export default defineConfig({
   site: "https://okohl.com",
@@ -10,6 +10,7 @@ export default defineConfig({
     processor: satteri({
       features: { wikilinks: true },
       mdastPlugins: [wikiLinks(noteTitle)],
+      hastPlugins: [sidenotes],
     }),
   },
   vite: { plugins: [tailwindcss()] },

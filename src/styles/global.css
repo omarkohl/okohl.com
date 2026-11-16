@@ -90,3 +90,47 @@
 .prose a {
   font-weight: inherit;
 }
+
+/* Footnotes: a list under the text on narrow screens, sidenotes on wide ones. */
+.prose .sidenote {
+  display: none;
+}
+.prose .footnotes {
+  margin-top: 2.5em;
+  border-top: 1px solid var(--color-rule);
+  font-size: 15px;
+  color: var(--color-ink-3);
+}
+.prose .footnotes h2 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.prose a[data-footnote-ref],
+.prose a[data-footnote-backref] {
+  text-decoration: none;
+  color: var(--color-accent);
+}
+@media (min-width: 1024px) {
+  .prose .sidenote {
+    display: block;
+    float: right;
+    clear: right;
+    width: 232px;
+    margin: 0.2em -264px 0.8em 0;
+    font-size: 14px;
+    line-height: 1.45;
+    font-style: normal;
+    font-weight: 400;
+    color: var(--color-ink-3);
+  }
+  .prose .sidenote > sup:first-child {
+    color: var(--color-accent);
+  }
+  .prose .footnotes {
+    display: none;
+  }
+}
