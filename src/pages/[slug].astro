@@ -66,7 +66,7 @@ const revs = history(note);
           </time>
         </span>
         {" · "}
-        <span data-pagefind-filter="stage">
+        <span data-pagefind-filter={`stage:${stage}`}>
           {s.symbol} {s.label.toLowerCase()}
         </span>
         {topics.length > 0 && " · "}
@@ -84,6 +84,10 @@ const revs = history(note);
       <span hidden data-pagefind-filter="kind">
         {kind}
       </span>
+      <span
+        hidden
+        data-pagefind-sort={`date:${tended(note).toISOString().slice(0, 10)}`}
+      />
       <span hidden data-pagefind-meta="date">
         {fmtLong(tended(note))}
       </span>

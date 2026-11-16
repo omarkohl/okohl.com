@@ -1,5 +1,34 @@
 ---
 import Base from "../layouts/Base.astro";
+import { STAGES } from "../lib/notes";
+
+const groups = [
+  {
+    name: "kind",
+    options: [
+      { value: "", label: "all" },
+      { value: "note", label: "notes" },
+      { value: "essay", label: "essays" },
+    ],
+  },
+  {
+    name: "stage",
+    options: [
+      { value: "", label: "all" },
+      ...Object.entries(STAGES).map(([value, s]) => ({
+        value,
+        label: `${s.symbol} ${s.label.toLowerCase()}`,
+      })),
+    ],
+  },
+  {
+    name: "sort",
+    options: [
+      { value: "", label: "relevance" },
+      { value: "newest", label: "newest" },
+    ],
+  },
+];
 ---
 
 <Base title="Search" current="search">
@@ -23,18 +52,21 @@ import Base from "../layouts/Base.astro";
       ></span>
     </div>
     <div class="flex flex-wrap items-baseline gap-x-7 gap-y-2 text-[15px]">
-      <span class="flex items-baseline gap-3" id="kind-filter">
-        <span class="smallcaps text-muted">kind</span>
-        <button type="button" data-kind="" class="cursor-pointer">
-          all
-        </button>
-        <button type="button" data-kind="note" class="cursor-pointer">
-          notes
-        </button>
-        <button type="button" data-kind="essay" class="cursor-pointer">
-          essays
-        </button>
-      </span>
+      {groups.map((g) => (
+        <span class="option-group flex items-baseline gap-3">
+          <span class="smallcaps text-muted">{g.name}</span>
+          {g.options.map((o) => (
+            <button
+              type="button"
+              data-name={g.name}
+              data-value={o.value}
+              class="cursor-pointer"
+            >
+              {o.label}
+            </button>
+          ))}
+        </span>
+      ))}
     </div>
   </form>
 
@@ -50,10 +82,10 @@ import Base from "../layouts/Base.astro";
 </Base>
 
 <style>
-  #kind-filter button[aria-pressed="true"] {
+  .option-group button[aria-pressed="true"] {
     font-weight: 600;
   }
-  #kind-filter button[aria-pressed="false"] {
+  .option-group button[aria-pressed="false"] {
     text-decoration: underline;
     text-decoration-color: var(--color-underline);
     text-underline-offset: 3px;
@@ -71,7 +103,10 @@ import Base from "../layouts/Base.astro";
     init: () => Promise<void>;
     debouncedSearch: (
       q: string,
-      opts?: { filters?: Record<string, string> },
+      opts?: {
+        filters?: Record<string, string>;
+        sort?: Record<string, "asc" | "desc">;
+      },
       ms?: number,
     ) => Promise<{ results: { data: () => Promise<Result> }[] } | null>;
   };
@@ -79,13 +114,16 @@ import Base from "../layouts/Base.astro";
   const input = document.querySelector<HTMLInputElement>("#q")!;
   const status = document.querySelector<HTMLElement>("#status")!;
   const results = document.querySelector<HTMLElement>("#results")!;
-  const kindButtons = [
-    ...document.querySelectorAll<HTMLButtonElement>("#kind-filter button"),
+  const buttons = [
+    ...document.querySelectorAll<HTMLButtonElement>(".option-group button"),
   ];
 
   const params = new URLSearchParams(location.search);
   input.value = params.get("q") ?? "";
-  let kind = params.get("kind") ?? "";
+  // Options chosen with the buttons, by group name: kind, stage, sort.
+  const chosen: Record<string, string> = {};
+  for (const b of buttons)
+    chosen[b.dataset.name!] ??= params.get(b.dataset.name!) ?? "";
 
   let pagefind: Pagefind | null = null;
   try {
@@ -136,14 +174,19 @@ import Base from "../layouts/Base.astro";
   }
 
   async function run() {
-    kindButtons.forEach((b) =>
-      b.setAttribute("aria-pressed", String(b.dataset.kind === kind)),
+    buttons.forEach((b) =>
+      b.setAttribute(
+        "aria-pressed",
+        String(b.dataset.value === chosen[b.dataset.name!]),
+      ),
     );
     const q = input.value.trim();
     const url = new URL(location.href);
     url.searchParams.set("q", q);
-    if (kind) url.searchParams.set("kind", kind);
-    else url.searchParams.delete("kind");
+    for (const [name, value] of Object.entries(chosen)) {
+      if (value) url.searchParams.set(name, value);
+      else url.searchParams.delete(name);
+    }
     history.replaceState(null, "", url);
 
     if (!pagefind) return;
@@ -153,9 +196,12 @@ import Base from "../layouts/Base.astro";
       return;
     }
     const t0 = performance.now();
+    const filters: Record<string, string> = {};
+    if (chosen.kind) filters.kind = chosen.kind;
+    if (chosen.stage) filters.stage = chosen.stage;
     const search = await pagefind.debouncedSearch(
       q,
-      { filters: kind ? { kind } : {} },
+      { filters, ...(chosen.sort === "newest" && { sort: { date: "desc" } }) },
       150,
     );
     if (!search) return; // superseded by a newer query
@@ -166,9 +212,9 @@ import Base from "../layouts/Base.astro";
   }
 
   input.addEventListener("input", run);
-  kindButtons.forEach((b) =>
+  buttons.forEach((b) =>
     b.addEventListener("click", () => {
-      kind = b.dataset.kind ?? "";
+      chosen[b.dataset.name!] = b.dataset.value ?? "";
       run();
     }),
   );
