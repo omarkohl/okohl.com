@@ -16,6 +16,11 @@ describe("extractInternalLinks", () => {
     ]);
   });
 
+  it("ignores links in code", () => {
+    const md = "`[[a]]` and\n```\n[b](/b/)\n```\n[[c]]";
+    expect(extractInternalLinks(md)).toEqual(["c"]);
+  });
+
   it("deduplicates", () => {
     expect(extractInternalLinks("[a](/x/) [b](/x/)")).toEqual(["x"]);
   });

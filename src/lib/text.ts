@@ -1,10 +1,11 @@
 /**
  * Slugs of site-internal links: markdown `[x](/foo/)` and wiki `[[foo]]`,
- * `[[foo|x]]`, `[[foo#part]]`.
+ * `[[foo|x]]`, `[[foo#part]]`. Links in code are examples, not links.
  */
 export function extractInternalLinks(markdown: string): string[] {
   const slugs = new Set<string>();
-  for (const m of markdown.matchAll(
+  const prose = markdown.replace(/```[\s\S]*?```|`[^`\n]*`/g, "");
+  for (const m of prose.matchAll(
     /\]\(\/([a-z0-9][a-z0-9-]*)\/?(?:#[^)]*)?\)|\[\[([a-z0-9][a-z0-9-]*)(?:[#|][^\]]*)?\]\]/gi,
   )) {
     slugs.add((m[1] ?? m[2]).toLowerCase());

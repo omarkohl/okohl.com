@@ -34,7 +34,24 @@ export async function allNotes(): Promise<Note[]> {
     if (RESERVED.has(n.id))
       throw new Error(`Note slug "${n.id}" clashes with a site route`);
   }
+  warnBrokenLinks(notes);
   return notes.sort((a, b) => tended(b).getTime() - tended(a).getTime());
+}
+
+const warned = new Set<string>();
+
+/** Internal links can rot when a note is renamed, deleted or kept as a draft. */
+function warnBrokenLinks(notes: Note[]) {
+  const ids = new Set(notes.map((n) => n.id));
+  for (const n of notes) {
+    for (const slug of extractInternalLinks(n.body ?? "")) {
+      if (ids.has(slug) || RESERVED.has(slug)) continue;
+      const msg = `[links] ${n.id}: broken internal link to /${slug}/`;
+      if (warned.has(msg)) continue;
+      warned.add(msg);
+      console.warn(`\x1b[33m${msg}\x1b[0m`);
+    }
+  }
 }
 
 export function backlinks(target: Note, notes: Note[]): Note[] {
