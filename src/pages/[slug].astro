@@ -7,6 +7,7 @@ import {
   backlinks,
   fmtLong,
   minutes,
+  summary,
   tended,
   topicUrl,
   url,
@@ -23,11 +24,15 @@ export async function getStaticPaths() {
 
 const { note, linkedFrom } = Astro.props as { note: Note; linkedFrom: Note[] };
 const { Content } = await render(note);
-const { title, kind, stage, planted, topics, description } = note.data;
+const { title, kind, stage, planted, topics } = note.data;
 const s = STAGES[stage];
 ---
 
-<Base title={title} description={description}>
+<Base
+  title={title}
+  description={summary(note)}
+  article={{ published: planted, modified: tended(note), tags: topics }}
+>
   <article class="flex max-w-[680px] min-w-0 flex-col gap-6" data-pagefind-body>
     <header class="flex flex-col gap-2.5">
       <h1 class="m-0 text-[40px] leading-tight font-semibold">{title}</h1>

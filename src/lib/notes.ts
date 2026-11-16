@@ -1,5 +1,5 @@
 import { getCollection, type CollectionEntry } from "astro:content";
-import { extractInternalLinks, readingMinutes } from "./text";
+import { excerpt, extractInternalLinks, readingMinutes } from "./text";
 
 export type Note = CollectionEntry<"notes">;
 
@@ -23,6 +23,7 @@ export const tended = (n: Note) => n.data.tended ?? n.data.planted;
 export const url = (n: Note) => `/${n.id}/`;
 export const topicUrl = (t: string) => `/topics/${t}/`;
 export const minutes = (n: Note) => readingMinutes(n.body ?? "");
+export const summary = (n: Note) => n.data.description ?? excerpt(n.body ?? "");
 
 export async function allNotes(): Promise<Note[]> {
   const notes = await getCollection(
