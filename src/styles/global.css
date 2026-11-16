@@ -24,6 +24,21 @@
     font-family: var(--font-serif);
     font-size: 18px;
     line-height: 1.6;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-paper: #171614;
+      --color-ink: #e8e4da;
+      --color-ink-2: #cfcabf;
+      --color-ink-3: #c2bdb2;
+      --color-muted: #9a9488;
+      --color-rule: #3a3732;
+      --color-underline: #5c574e;
+      --color-accent: #e39a8a;
+      --color-wash: #211f1c;
+      --color-mark: #5a4a22;
+    }
   }
   a {
     text-decoration: underline;
