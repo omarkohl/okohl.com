@@ -68,6 +68,11 @@ const groups = [
         </span>
       ))}
     </div>
+    <p class="m-0 text-sm text-muted">
+      <code>"exact phrase"</code> · <code>#topic</code> ·{" "}
+      <code>stage:evergreen</code> · <code>date:2026</code> ·{" "}
+      <code>date:2026-01..2026-06</code>
+    </p>
   </form>
 
   <section id="results" class="flex flex-col gap-7" aria-label="Search results">
@@ -93,18 +98,20 @@ const groups = [
 </style>
 
 <script>
+  import { inRange, parseQuery } from "../lib/query";
+
   type Result = {
     url: string;
     excerpt: string;
-    meta: { title?: string; date?: string; stage?: string };
+    meta: { title?: string; date?: string; day?: string; stage?: string };
     filters: { kind?: string[] };
   };
   type Pagefind = {
     init: () => Promise<void>;
     debouncedSearch: (
-      q: string,
+      q: string | null,
       opts?: {
-        filters?: Record<string, string>;
+        filters?: Record<string, string | string[]>;
         sort?: Record<string, "asc" | "desc">;
       },
       ms?: number,
@@ -166,7 +173,7 @@ const groups = [
         a.href = r.url;
         art.append(a);
         const p = el("p", "m-0 text-base text-ink-2");
-        p.innerHTML = `…${r.excerpt}…`; // Pagefind escapes content; only <mark> is added.
+        p.innerHTML = r.excerpt && `…${r.excerpt}…`; // Pagefind escapes content; only <mark> is added.
         art.append(p);
         return art;
       }),
@@ -190,25 +197,39 @@ const groups = [
     history.replaceState(null, "", url);
 
     if (!pagefind) return;
-    if (!q) {
+    const query = parseQuery(q);
+    const filters: Record<string, string | string[]> = {};
+    if (chosen.kind) filters.kind = chosen.kind;
+    if (query.topics.length) filters.topic = query.topics;
+    // A stage typed in the query is more specific than the button.
+    const stage = query.stage ?? chosen.stage;
+    if (stage) filters.stage = stage;
+    const dated = Boolean(query.from || query.to);
+    if (!query.term && !query.topics.length && !query.stage && !dated) {
       status.textContent = "";
       results.replaceChildren();
       return;
     }
+
     const t0 = performance.now();
-    const filters: Record<string, string> = {};
-    if (chosen.kind) filters.kind = chosen.kind;
-    if (chosen.stage) filters.stage = chosen.stage;
+    // Without a term, Pagefind returns every page that passes the filters.
     const search = await pagefind.debouncedSearch(
-      q,
+      query.term || null,
       { filters, ...(chosen.sort === "newest" && { sort: { date: "desc" } }) },
       150,
     );
     if (!search) return; // superseded by a newer query
-    const items = await Promise.all(
-      search.results.slice(0, 20).map((r) => r.data()),
-    );
-    render(items, search.results.length, performance.now() - t0);
+    const found = search.results;
+    if (dated) {
+      // Pagefind has no range filter, so dates are compared here.
+      const items = (await Promise.all(found.map((r) => r.data()))).filter(
+        (r) => inRange(r.meta.day ?? "", query),
+      );
+      render(items.slice(0, 20), items.length, performance.now() - t0);
+    } else {
+      const items = await Promise.all(found.slice(0, 20).map((r) => r.data()));
+      render(items, found.length, performance.now() - t0);
+    }
   }
 
   input.addEventListener("input", run);

@@ -88,6 +88,10 @@ const revs = history(note);
         hidden
         data-pagefind-sort={`date:${tended(note).toISOString().slice(0, 10)}`}
       />
+      <span
+        hidden
+        data-pagefind-meta={`day:${tended(note).toISOString().slice(0, 10)}`}
+      />
       <span hidden data-pagefind-meta="date" data-pagefind-ignore>
         {fmtLong(tended(note))}
       </span>
