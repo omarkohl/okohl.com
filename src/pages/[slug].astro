@@ -5,7 +5,9 @@ import {
   STAGES,
   allNotes,
   backlinks,
+  commitUrl,
   fmtLong,
+  history,
   minutes,
   summary,
   tended,
@@ -40,6 +42,7 @@ const sections = [
 const { Content } = await render(note);
 const { title, kind, stage, planted, topics } = note.data;
 const s = STAGES[stage];
+const revs = history(note);
 ---
 
 <Base
@@ -48,7 +51,7 @@ const s = STAGES[stage];
   article={{ published: planted, modified: tended(note), tags: topics }}
 >
   <article class="flex max-w-[680px] min-w-0 flex-col gap-6" data-pagefind-body>
-    <header class="flex flex-col gap-2.5">
+    <header class="relative flex flex-col gap-2.5">
       <h1 class="m-0 text-[40px] leading-tight font-semibold">{title}</h1>
       <p class="m-0 text-[15px] text-muted italic">
         <span>
@@ -87,6 +90,16 @@ const s = STAGES[stage];
       <span hidden data-pagefind-meta="stage">
         {s.symbol} {s.label.toLowerCase()}
       </span>
+      {revs.length > 0 && (
+        <aside
+          class="smallcaps flex flex-wrap gap-x-5 text-sm text-muted lg:absolute lg:top-3 lg:left-[712px] lg:w-[232px] lg:flex-col"
+          data-pagefind-ignore
+        >
+          <a href="#history">
+            history · {revs.length} revision{revs.length > 1 && "s"}
+          </a>
+        </aside>
+      )}
     </header>
 
     <div class="prose max-w-none">
@@ -109,5 +122,28 @@ const s = STAGES[stage];
         ))}
       </section>
     ))}
+
+    {revs.length > 0 && (
+      <section
+        id="history"
+        class="mt-6 flex flex-col gap-3 border-t border-ink pt-4"
+        data-pagefind-ignore
+      >
+        <h2 class="smallcaps m-0 text-lg font-semibold">History</h2>
+        <ol class="m-0 flex list-none flex-col gap-1.5 p-0 text-base">
+          {revs.map((r) => (
+            <li class="grid grid-cols-[104px_1fr] items-baseline gap-2">
+              <time
+                datetime={r.date.toISOString()}
+                class="text-sm text-muted tabular-nums"
+              >
+                {fmtLong(r.date)}
+              </time>
+              <a href={commitUrl(r)}>{r.subject}</a>
+            </li>
+          ))}
+        </ol>
+      </section>
+    )}
   </article>
 </Base>

@@ -1,7 +1,10 @@
 import { getCollection, type CollectionEntry } from "astro:content";
+import { revisions, type Revision } from "./history";
 import { excerpt, extractInternalLinks, readingMinutes } from "./text";
 
 export type Note = CollectionEntry<"notes">;
+
+export const REPO = "https://github.com/omarkohl/okohl.com";
 
 export const STAGES = {
   seedling: { symbol: "∘", label: "Seedling", blurb: "a first, rough thought" },
@@ -69,6 +72,10 @@ export function topicsOf(notes: Note[]): Map<string, Note[]> {
   }
   return new Map([...map].sort(([a], [b]) => a.localeCompare(b)));
 }
+
+export const history = (n: Note): Revision[] =>
+  n.filePath ? revisions(n.filePath) : [];
+export const commitUrl = (r: Revision) => `${REPO}/commit/${r.hash}`;
 
 export const fmtShort = (d: Date) =>
   d.toLocaleDateString("en-GB", {
