@@ -106,6 +106,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     </div>
 
     <script>
+      import "../scripts/preview";
+
       // "/" jumps to search from anywhere, unless the user is typing.
       document.addEventListener("keydown", (e) => {
         const t = e.target as HTMLElement;

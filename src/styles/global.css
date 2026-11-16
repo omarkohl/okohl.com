@@ -134,3 +134,37 @@
     display: none;
   }
 }
+
+#link-preview {
+  position: fixed;
+  z-index: 10;
+  display: flex;
+  width: min(340px, calc(100vw - 24px));
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid var(--color-rule);
+  border-radius: 3px;
+  background: var(--color-wash);
+  padding: 12px 14px;
+  font-size: 15px;
+  line-height: 1.45;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.12);
+  pointer-events: none;
+}
+#link-preview[hidden] {
+  display: none;
+}
+#link-preview strong {
+  font-size: 17px;
+  font-weight: 600;
+}
+#link-preview small {
+  font-size: 13px;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+}
+#link-preview p {
+  margin: 6px 0 0;
+  color: var(--color-ink-2);
+}
