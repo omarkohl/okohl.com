@@ -90,16 +90,17 @@ const revs = history(note);
       <span hidden data-pagefind-meta="stage">
         {s.symbol} {s.label.toLowerCase()}
       </span>
-      {revs.length > 0 && (
-        <aside
-          class="smallcaps flex flex-wrap gap-x-5 text-sm text-muted lg:absolute lg:top-3 lg:left-[712px] lg:w-[232px] lg:flex-col"
-          data-pagefind-ignore
-        >
+      <aside
+        class="smallcaps flex flex-wrap gap-x-5 text-sm text-muted lg:absolute lg:top-3 lg:left-[712px] lg:w-[232px] lg:flex-col"
+        data-pagefind-ignore
+      >
+        {revs.length > 0 && (
           <a href="#history">
             history · {revs.length} revision{revs.length > 1 && "s"}
           </a>
-        </aside>
-      )}
+        )}
+        <a href={`/${note.id}.md`}>raw markdown</a>
+      </aside>
     </header>
 
     <div class="prose max-w-none">
