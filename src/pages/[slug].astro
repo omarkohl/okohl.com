@@ -53,7 +53,7 @@ const revs = history(note);
   <article class="flex max-w-[680px] min-w-0 flex-col gap-6" data-pagefind-body>
     <header class="relative flex flex-col gap-2.5">
       <h1 class="m-0 text-[40px] leading-tight font-semibold">{title}</h1>
-      <p class="m-0 text-[15px] text-muted italic">
+      <p class="m-0 text-[15px] text-muted italic" data-pagefind-ignore>
         <span>
           planted{" "}
           <time datetime={planted.toISOString()}>{fmtLong(planted)}</time>
@@ -81,17 +81,17 @@ const revs = history(note);
         {" · "}
         <span>{minutes(note)} min</span>
       </p>
-      <span hidden data-pagefind-filter="kind">
+      <span hidden data-pagefind-filter="kind" data-pagefind-ignore>
         {kind}
       </span>
       <span
         hidden
         data-pagefind-sort={`date:${tended(note).toISOString().slice(0, 10)}`}
       />
-      <span hidden data-pagefind-meta="date">
+      <span hidden data-pagefind-meta="date" data-pagefind-ignore>
         {fmtLong(tended(note))}
       </span>
-      <span hidden data-pagefind-meta="stage">
+      <span hidden data-pagefind-meta="stage" data-pagefind-ignore>
         {s.symbol} {s.label.toLowerCase()}
       </span>
       <aside
