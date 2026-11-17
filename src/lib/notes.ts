@@ -23,7 +23,6 @@ const RESERVED = new Set([
   "pagefind",
 ]);
 
-export const tended = (n: Note) => n.data.tended ?? n.data.planted;
 export const url = (n: Note) => `/${n.id}/`;
 export const topicUrl = (t: string) => `/topics/${t}/`;
 export const minutes = (n: Note) => readingMinutes(n.body ?? "");
@@ -76,6 +75,10 @@ export function topicsOf(notes: Note[]): Map<string, Note[]> {
 
 export const history = (n: Note): Revision[] =>
   n.filePath ? revisions(n.filePath) : [];
+
+/** Front matter `tended` wins, else the latest commit date, else `planted`. */
+export const tended = (n: Note) =>
+  n.data.tended ?? history(n)[0]?.date ?? n.data.planted;
 export const commitUrl = (r: Revision) => `${REPO}/commit/${r.hash}`;
 
 export const fmtShort = (d: Date) =>

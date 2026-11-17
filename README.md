@@ -17,7 +17,7 @@ Add `src/content/notes/<slug>.md`. The note is served at `/<slug>/`.
 title: Writing More
 stage: seedling # seedling | budding | evergreen
 planted: 2026-11-14
-tended: 2026-11-20 # optional, last revision
+tended: 2026-11-20 # optional, defaults to last commit date
 topics: [writing]
 kind: note # note | essay
 description: … # optional, shown for essays and in RSS

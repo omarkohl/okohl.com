@@ -19,8 +19,18 @@ export function parseLog(out: string): Revision[] {
     });
 }
 
+const cache = new Map<string, Revision[]>();
+
 /** Commits that changed `file`, or none if git or the history is missing. */
 export function revisions(file: string): Revision[] {
+  const hit = cache.get(file);
+  if (hit) return hit;
+  const revs = readRevisions(file);
+  cache.set(file, revs);
+  return revs;
+}
+
+function readRevisions(file: string): Revision[] {
   try {
     return parseLog(
       execFileSync(
